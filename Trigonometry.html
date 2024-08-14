@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trigonometry</title>
+
+    <style>
+      body {
+        background-color: black;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      #myCanvas {
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" height="500" width="500"></canvas>
+    <script>
+      const canvas = document.getElementById("myCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const offset = {
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+      };
+
+      const A = {
+        x: 0,
+        y: 0,
+      };
+
+      const B = {
+        x: 90,
+        y: 120,
+      };
+
+      const C = {
+        x: B.x,
+        y: 0,
+      };
+
+      const c = distance(A, B);
+      const a = distance(B, C);
+      const b = distance(A, C);
+
+      ctx.translate(offset.x, offset.y);
+
+      update();
+
+      document.onmousemove = function (e) {
+        B.x = e.x - offset.x;
+        B.y = e.y - offset.y;
+        C.x = B.x;
+
+        update();
+      };
+
+      function update() {
+        ctx.clearRect(-offset.x, -offset.y, canvas.width, canvas.height);
+
+        drawCoordinateSystem(ctx, offset);
+
+        drawLine(A, B);
+        drawLine(A, C);
+        drawLine(B, C);
+
+        drawText("c", average(A, B));
+        drawText("a", average(B, C));
+        drawText("b", average(A, C));
+
+        drawText("θ", A)
+
+        // drawPoint(A);
+        // drawText("A", A);
+        // drawPoint(B);
+        // drawText("B", B);
+        // drawPoint(C);
+        // drawText("C", C);
+      }
+
+      function drawLine(p1, p2, color = "blue") {
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      function drawText(text, loc, color = "#000") {
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.font = "18px Courier";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 8;
+        ctx.strokeText(text, loc.x, loc.y);
+        ctx.fillText(text, loc.x, loc.y);
+      }
+
+      function drawPoint(loc, size = 20, color = "#000") {
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.arc(loc.x, loc.y, size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawCoordinateSystem(ctx, offset) {
+        ctx.beginPath();
+        ctx.moveTo(-offset.x, 0);
+        ctx.lineTo(ctx.canvas.width - offset.x, 0);
+        ctx.moveTo(0, -offset.y);
+        ctx.lineTo(0, ctx.canvas.height - offset.y);
+        ctx.setLineDash([4, 2]);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "gray";
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      function average(p1, p2) {
+        return {
+          x: (p1.x + p2.x) / 2,
+          y: (p1.y + p2.y) / 2,
+        };
+      }
+
+      function distance(p1, p2) {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+    </script>
+  </body>
+</html>

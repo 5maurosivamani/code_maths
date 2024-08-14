@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linear Interpolation</title>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      #myCanvas {
+        /* border: 1px solid black; */
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+
+    <script>
+      const canvas = document.getElementById("myCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const A = { x: 500, y: 200 };
+      const B = { x: 100, y: 500 };
+
+      const orange = { r: 200, g: 110, b: 0 };
+      const blue = { r: 0, g: 10, b: 180 };
+
+      const lowFreq = 1;
+      const highFreq = 200;
+
+      let audioCtx = null;
+      let osc = null;
+
+      canvas.onclick = function () {
+        if (audioCtx == null) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          osc = audioCtx.createOscillator();
+          osc.frequency.value = 300;
+          osc.start();
+
+          const node = audioCtx.createGain();
+          node.gain.value = 0.1;
+
+          osc.connect(node);
+          node.connect(audioCtx.destination);
+
+          // osc.onended = function () {
+          //   osc.stop();
+          //   audioCtx = null;
+          // };
+        }
+      };
+
+      animate();
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        const sec = Date.now() / 1000;
+
+        const t = (Math.sin((sec * 1) / (2 * Math.PI)) + 1) / 2;
+
+        drawDot(vLerp(A, B, t.toFixed(2)), "");
+
+        drawDot(A, "A");
+        drawDot(B, "B");
+
+        const color = vLerp(orange, blue, t);
+        const strokeColor = vLerp(blue, orange, t);
+
+        canvas.style.backgroundColor = `rgb(${color.r}, ${color.g},${color.b})`;
+
+        if (osc) {
+          const frequency = lerp(lowFreq, highFreq, t);
+          console.log("frequency", frequency);
+          osc.frequency.value = frequency;
+        }
+
+        ctx.strokeStyle = "#fff";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 60px arial";
+        ctx.setLineDash([lerp(20, 100, t), 100]);
+        // add stroke width
+        ctx.lineWidth = 3;
+
+        // ctx.strokeWidth = 5;
+        ctx.strokeStyle = `rgba(255,255,255, 0.2)`;
+        ctx.strokeText("click for sound!", width / 2, 50);
+        ctx.setLineDash([]);
+        ctx.fillStyle = `rgba(255,255,255,0.3)`;
+        ctx.fillText("click for sound!", width / 2, 50);
+
+        requestAnimationFrame(animate);
+      }
+
+      function vLerp(A, B, t) {
+        const res = {};
+
+        for (let attr in A) {
+          res[attr] = lerp(A[attr], B[attr], t);
+        }
+
+        return res;
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function drawDot(pos, label) {
+        ctx.beginPath();
+        ctx.fillStyle = "#fff";
+        ctx.strokeStyle = "black";
+        ctx.arc(pos.x, pos.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 14px arial";
+        ctx.fillText(label, pos.x, pos.y);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 14px arial";
+        ctx.fillText(`(${pos.x}, ${pos.y})`, pos.x, pos.y - 40);
+      }
+    </script>
+  </body>
+</html>
