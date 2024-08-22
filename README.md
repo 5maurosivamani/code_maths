@@ -7,3 +7,7 @@
 <h3>Trigonometry:</h3>
 
 <img src="./git_src/trigonometry_setup.png">
+
+<h3>With Chart</h3>
+
+<img src="./git_src/with_chart.png">
